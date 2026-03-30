@@ -1,0 +1,13 @@
+# Fichiers locaux Android Studio / Gradle
+/.gradle
+/.idea
+
+# Fichiers de build
+/build
+/app/build
+
+# Fichier local de configuration
+/local.properties
+
+# Divers
+.DS_Store
