@@ -11,6 +11,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import dev.mobile.tpsae.model.Movie
@@ -43,6 +45,8 @@ class MainActivity : ComponentActivity() {
 fun SearchScreen(viewModel: SearchViewModel) {
     //On écoute l'état du ViewModel
     val state by viewModel.state.collectAsState()
+
+    val context = LocalContext.current
 
     var query by remember { mutableStateOf("") }
 
@@ -78,7 +82,13 @@ fun SearchScreen(viewModel: SearchViewModel) {
                 //Liste des films
                 LazyColumn {
                     items(currentState.movies) { movie ->
-                        MovieItem(movie)
+                        MovieItem(movie = movie) {
+                            val intent = Intent(context, DetailActivity::class.java).apply {
+                                //On renseigne l'ID du film pour afficher le bon film
+                                putExtra("MOVIE_ID", movie.id)
+                            }
+                            context.startActivity(intent)
+                        }
                     }
                 }
             }
@@ -87,12 +97,13 @@ fun SearchScreen(viewModel: SearchViewModel) {
 }
 
 @Composable
-fun MovieItem(movie: Movie) {
+fun MovieItem(movie: Movie, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        onClick = onClick
     ) {
         Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
             //Affiche du film chargée depuis internet
