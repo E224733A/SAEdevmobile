@@ -1,39 +1,49 @@
 package dev.mobile.tpsae.data
 
+import dev.mobile.tpsae.BuildConfig
 import dev.mobile.tpsae.model.Movie
 import dev.mobile.tpsae.model.MovieResponse
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.request.*
-import io.ktor.serialization.kotlinx.json.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 object TmdbRepository {
     private const val BASE_URL = "https://api.themoviedb.org/3"
 
-    private const val API_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiOTEzZjgzYzNjYWJiMDFlYzhhNjkwNjA3NTNiOWE1MyIsIm5iZiI6MTc3NDM0Mzk5OC43MzYsInN1YiI6IjY5YzI1NzNlZWYyMjkyYjhlYmI2N2Y0OSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.KFqetJXDRya1TRcvtDo9QYcLy7JMHbozm8NeQXRIfHk"
-
     private val client = HttpClient {
         install(ContentNegotiation) {
-            json(Json { ignoreUnknownKeys = true })
+            json(Json {
+                ignoreUnknownKeys = true
+            })
+        }
+    }
+
+    private fun requireApiKey() {
+        check(BuildConfig.TMDB_API_KEY.isNotBlank()) {
+            "TMDB_API_KEY manquante. Ajoute-la dans local.properties."
         }
     }
 
     suspend fun searchMovies(query: String): List<Movie> {
+        requireApiKey()
+
         return client.get("$BASE_URL/search/movie") {
-            url {
-                parameters.append("query", query)
-                parameters.append("language", "fr-FR")
-            }
-            header("Authorization", "Bearer $API_TOKEN")
+            parameter("api_key", BuildConfig.TMDB_API_KEY)
+            parameter("query", query)
+            parameter("language", "fr-FR")
         }.body<MovieResponse>().results
     }
 
     suspend fun getMovieDetails(id: Int): Movie {
+        requireApiKey()
+
         return client.get("$BASE_URL/movie/$id") {
-            url { parameters.append("language", "fr-FR") }
-            header("Authorization", "Bearer $API_TOKEN")
+            parameter("api_key", BuildConfig.TMDB_API_KEY)
+            parameter("language", "fr-FR")
         }.body()
     }
 }
