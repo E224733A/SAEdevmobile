@@ -8,6 +8,9 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+// Lecture éventuelle de local.properties en secours.
+// Utile en local, mais le projet doit surtout pouvoir fonctionner
+// avec gradle.properties pour la recette du prof.
 val localProperties = Properties().apply {
     val localPropertiesFile = rootProject.file("local.properties")
     if (localPropertiesFile.exists()) {
@@ -15,7 +18,14 @@ val localProperties = Properties().apply {
     }
 }
 
-val tmdbApiKey = localProperties.getProperty("TMDB_API_KEY") ?: ""
+// Priorité :
+// 1. gradle.properties versionné dans le projet
+// 2. local.properties en secours sur la machine locale
+// 3. chaîne vide si rien n'est défini
+val tmdbApiKey =
+    (findProperty("TMDB_API_KEY") as String?)
+        ?: localProperties.getProperty("TMDB_API_KEY")
+        ?: ""
 
 android {
     namespace = "dev.mobile.tpsae"
@@ -32,6 +42,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Génère BuildConfig.TMDB_API_KEY
         buildConfigField("String", "TMDB_API_KEY", "\"$tmdbApiKey\"")
     }
 
