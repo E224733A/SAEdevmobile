@@ -1,47 +1,43 @@
 package dev.mobile.tpsae
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import dev.mobile.tpsae.data.TmdbRepository
 import dev.mobile.tpsae.ui.theme.TpSaeTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             TpSaeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+
+                //test temporaire
+                LaunchedEffect(Unit) {
+                    try {
+                        Log.d("TMDB_TEST", "Lancement de la requête...")
+                        val movies = TmdbRepository.searchMovies("Avatar")
+
+                        Log.d("TMDB_TEST", "Succès ! ${movies.size} films trouvés.")
+                        movies.forEach { movie ->
+                            Log.d("TMDB_TEST", "Film : ${movie.title} (Date : ${movie.releaseDate})")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("TMDB_TEST", "Erreur de connexion : ${e.message}")
+                    }
+                }
+
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Test en cours... Voir logcat")
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    TpSaeTheme {
-        Greeting("Android")
     }
 }
